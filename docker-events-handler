@@ -1,0 +1,16 @@
+#!/bin/bash
+
+which docker > /dev/null || exit 1
+
+_DIR_SCRIPTS="/etc/docker-events-handler"
+
+while read _line
+do
+	export _type="$(printf -- "${_line}" | awk -F';' '{printf "%s",$1}')"
+	export _status="$(printf -- "${_line}" | awk -F';' '{printf "%s",$2}')"
+	export _name="$(printf -- "${_line}" | awk -F';' '{printf "%s",$3}')"
+	if [ -x  "${_DIR_SCRIPTS}/${_type}_${_name}_${_status}.sh" ]; then
+		printf "Launching ${_DIR_SCRIPTS}/${_type}_${_name}_${_status}.sh\n"
+		"${_DIR_SCRIPTS}/${_type}_${_name}_${_status}.sh"
+	fi
+done < <(docker events "$@" --format '{{.Type}};{{.Status}};{{.Actor.Attributes.name}}')
