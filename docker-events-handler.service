@@ -1,0 +1,17 @@
+[Unit]
+Description=Docker Events Handler
+After=network-online.target firewalld.service containerd.service
+Wants=network-online.target
+Requires=docker.socket docker.service containerd.service
+PartOf=docker.service docker.service
+
+[Service]
+#Type=forking
+EnvironmentFile=-/etc/default/docker-events-handler
+ExecStart=/usr/local/bin/docker-events-handler
+KillMode=control-group
+#KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
